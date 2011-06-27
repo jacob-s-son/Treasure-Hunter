@@ -6,17 +6,18 @@
 <meta http-equiv="content-type" content="text/html; charset=UTF-8"/> 
 <link href="http://code.google.com/apis/maps/documentation/javascript/examples/default.css" rel="stylesheet" type="text/css" /> 
 <title>Google Maps JavaScript API v3 Example: Map Simple</title> 
-<script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false"></script> 
+<script type="text/javascript" src="javascripts/jquery.js"></script> 
+<script type="text/javascript" src="http://maps.google.com/maps/api/js?v=3.5&sensor=false"></script> 
 <script type="text/javascript"> 
   function initialize() {
     // var myLatlng = new google.maps.LatLng(-34.397, 150.644);
     var myOptions = {
-      zoom: 8,
+      // zoom: 8,
       mapTypeId: google.maps.MapTypeId.ROADMAP
     }
     var map = new google.maps.Map(document.getElementById("map_canvas"), myOptions);
 		
-		var LatLngList = new Array (new google.maps.LatLng (56.957,24.104), new google.maps.LatLng (56.933,24.148));
+		var LatLngList = new Array (new google.maps.LatLng (56.96887,24.08205), new google.maps.LatLng (56.92393,24.16909));
 		//  Create a new viewpoint bound
 		var bounds = new google.maps.LatLngBounds ();
 		//  Go through each...
@@ -26,10 +27,47 @@
 		}
 		//  Fit these bounds to the map
 		map.fitBounds (bounds);
+		
+		google.maps.event.addListener(map, "mousemove", function(event){
+			var currentProjection = map.getProjection();
+//			var xy = currentProjection.fromLatLngToPoint(latlng, map.getZoom());
+			$("#log").html("Zoom:" + map.getZoom() + " WGS84:(" + event.latLng.lat().toFixed(5) + "," + event.latLng.lng().toFixed(5) );// + ") Px:(" + xy.x + "," + xy.y + ")");
+			previousPos = event.latLng;
+		});//onmouseover
+		
+		
+    google.maps.event.addListener(map, 'bounds_changed', function() {
+      var map_sw = map.getBounds().getSouthWest();
+   		var map_ne = map.getBounds().getNorthEast();
+   		var width = map_ne.lng() - map_sw.lng();
+   		var height = map_ne.lat() - map_sw.lat();
+   		var square_width = width / 16;
+   		var square_height = height / 16;
+   		var rectables = new Array();
+   		$("#squares").html("Width : " + width + ", Height : " + height + "; square_width : " + square_width + ", square_height : " + square_height);
+
+   		for( i = 1; i <= 16; i++ ) {
+   		  for( j = 1; j <= 16; j++ ) {
+           sw = new google.maps.LatLng( map_ne.lat() - ( square_height * i ), map_ne.lng() - ( square_width * j ) );
+           ne = new google.maps.LatLng( sw.lat() + square_height, sw.lng() + square_width );
+           rec_bounds = new google.maps.LatLngBounds( sw, ne );
+           rec = new google.maps.Rectangle({
+             map:map,
+             strokeColor:"red",
+             fillOpacity:0
+           });
+
+           rec.setBounds(rec_bounds);
+   		  }
+   		}
+    });
+
   }
 </script> 
 </head> 
 <body onload="initialize()"> 
   <div style="width:512px;height:512px;" id="map_canvas"></div> 
+  <div id="log"></div>
+  <div id="squares"></div>
 </body> 
 </html>
