@@ -7,17 +7,50 @@
 <link href="http://code.google.com/apis/maps/documentation/javascript/examples/default.css" rel="stylesheet" type="text/css" /> 
 <title>Google Maps JavaScript API v3 Example: Map Simple</title> 
 <script type="text/javascript" src="javascripts/jquery.js"></script> 
-<script type="text/javascript" src="http://maps.google.com/maps/api/js?v=3.5&sensor=false"></script> 
+<script type="text/javascript" src="http://maps.google.com/maps/api/js?v=3.3&sensor=false"></script> 
 <script type="text/javascript"> 
+	var rectangles = new Array();
+	var rectangle_bounds = new Array();
+	
+	function printObject(o) {
+	  var out = '';
+	  for (var p in o) {
+	    out += p + ': ' + o[p] + '\n';
+	  }
+	  alert(out);
+	}
+	
+	function find_rectangle(latlng){
+		for (var i = 0; i < 256; i++) {
+			rec = rectangles[i];
+
+			if (rec.getBounds().contains(latlng)) {
+				return rec;
+			}
+		}
+	}
+	
+	function show_coordinates(rectangle) {
+//		var rectangle = rec;
+		alert("SW = " + rectangle.getBounds().getSouthWest().lat() + ", " + rectangle.getBounds().getSouthWest().lng() + " ; NE = " + rectangle.getBounds().getNorthEast().lat() + ", " + rectangle.getBounds().getNorthEast().lng());
+	}
+
   function initialize() {
-    // var myLatlng = new google.maps.LatLng(-34.397, 150.644);
     var myOptions = {
-      // zoom: 8,
-      mapTypeId: google.maps.MapTypeId.ROADMAP
+      mapTypeId: google.maps.MapTypeId.ROADMAP,
+			zoomControl : false,
+			rotateControl : false,
+			panControl : false,
+			streetViewControl : false
     }
     var map = new google.maps.Map(document.getElementById("map_canvas"), myOptions);
-		
-		var LatLngList = new Array (new google.maps.LatLng (56.96887,24.08205), new google.maps.LatLng (56.92393,24.16909));
+		if (arguments.length == 0) {
+			var default_latlngs = new Array (new google.maps.LatLng (56.96887,24.08205), new google.maps.LatLng (56.92393,24.16909));
+		}
+		else {
+			var default_latlngs = new Array ( new google.maps.LatLng ( arguments[0], arguments[1] ) , new google.maps.LatLng ( arguments[2], arguments[3] ) );
+		}
+		var LatLngList = ;
 		//  Create a new viewpoint bound
 		var bounds = new google.maps.LatLngBounds ();
 		//  Go through each...
@@ -43,29 +76,59 @@
    		var height = map_ne.lat() - map_sw.lat();
    		var square_width = width / 16;
    		var square_height = height / 16;
-   		var rectables = new Array();
+			var index = 0;
    		$("#squares").html("Width : " + width + ", Height : " + height + "; square_width : " + square_width + ", square_height : " + square_height);
 
    		for( i = 1; i <= 16; i++ ) {
    		  for( j = 1; j <= 16; j++ ) {
-           sw = new google.maps.LatLng( map_ne.lat() - ( square_height * i ), map_ne.lng() - ( square_width * j ) );
-           ne = new google.maps.LatLng( sw.lat() + square_height, sw.lng() + square_width );
-           rec_bounds = new google.maps.LatLngBounds( sw, ne );
-           rec = new google.maps.Rectangle({
-             map:map,
-             strokeColor:"red",
-             fillOpacity:0
-           });
-
-           rec.setBounds(rec_bounds);
+        	var sw = new google.maps.LatLng( map_ne.lat() - ( square_height * i ), map_ne.lng() - ( square_width * j ) );
+          var ne = new google.maps.LatLng( sw.lat() + square_height, sw.lng() + square_width );
+          var rec_bounds = new google.maps.LatLngBounds( sw, ne );
+          rectangles[index] = new google.maps.Rectangle({
+          	map:map,
+           	strokeColor:"#C11B17",
+           	fillOpacity:0,
+						clickable:true,
+						strokeWeight:0.3,
+						strokeOpacity:1.0
+         	});
+					
+					rectangles[index].setBounds(rec_bounds);
+					rectangle_bounds[index] = rec_bounds;
+					index++;
    		  }
    		}
+			
+			for (var i = 0; i < 256; i++) {
+				rec = rectangles[i];
+
+				google.maps.event.addListener(rec, 'click', function(event) {
+					// printObject(event);
+					f_rec = find_rectangle(event.latLng);
+					// printObject(f_rec);
+					show_coordinates(f_rec);
+					map.fitBounds(f_rec.getBounds());
+			  });
+			}
     });
 
   }
 </script> 
 </head> 
 <body onload="initialize()"> 
+	<div id="breadcrumb_container">
+		<ul style="display:inline;">
+			<li>
+				<a id="step_1" href="javascript:initialize()">Step 1 > </a>
+			</li>
+			<li>
+				<a id="step_2">Step 2 > </a>
+			</li>
+			<li>
+				<a id="step_3">Step 3</a>
+			</li>
+		</ul>
+	</div>
   <div style="width:512px;height:512px;" id="map_canvas"></div> 
   <div id="log"></div>
   <div id="squares"></div>
