@@ -40,14 +40,12 @@
 		farthest_step = $("div#breadcrumb_container li.current").children().first();
 		farthest_step_nr = parseInt(farthest_step.attr("id").match(/_([1-3])/)[1]);
 		
-		alert("#step_" + ( farthest_step_nr + 1) );
 		new_farthest_step = $("#step_" + ( farthest_step_nr + 1) );
-		alert(new_farthest_step.attr("id"));
+
 		new_farthest_step.parent().removeClass();
 		new_farthest_step.parent().addClass("current");
 		farthest_step.parent().removeClass();
 		
-		alert(get_breadcrumb_action(rec_bounds));
 		new_farthest_step.attr("href", get_breadcrumb_action(rec_bounds));
 	}
 	
@@ -132,7 +130,7 @@
 					// printObject(event);
 					f_rec = find_rectangle(event.latLng);
 					// printObject(f_rec);
-					show_coordinates(f_rec);
+					// show_coordinates(f_rec);
 					map.fitBounds(f_rec.getBounds());
 					update_breadcrumbs(f_rec.getBounds());
 			  });
@@ -146,7 +144,7 @@
 	<div id="breadcrumb_container">
 		<ul>
 			<li class="current" >
-				<a id="step_1" href="javascript:initialize()">Step 1 > </a>
+				<a id="step_1" href="javascript:initialize(); set_current(this);">Step 1 > </a>
 			</li>
 			<li class="hidden" >
 				<a id="step_2">Step 2 > </a>
