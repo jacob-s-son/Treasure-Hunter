@@ -1,5 +1,5 @@
-/* DO NOT MODIFY. This file was compiled Sun, 03 Jul 2011 21:58:13 GMT from
- * /Users/edgars/Documents/Workspace/Treasure-Hunter/app/coffeescripts/application.coffee
+/* DO NOT MODIFY. This file was compiled Mon, 04 Jul 2011 09:52:20 GMT from
+ * /Users/jekabedg/Workspace/treasure-hunter/app/coffeescripts/application.coffee
  */
 
 (function() {
@@ -39,9 +39,15 @@
     };
     Square.prototype.hover = function() {
       if (this.rec.attr("fill-opacity") === 0) {
-        return this.rec.attr("fill-opacity", 0.5);
+        return this.rec.attr({
+          "fill-opacity": 0.5,
+          "fill": "#00FFFF"
+        });
       } else {
-        return this.rec.attr("fill-opacity", 0);
+        return this.rec.attr({
+          "fill-opacity": 0,
+          "fill": "#99182C"
+        });
       }
     };
     Square.prototype.add_events = function() {
@@ -74,7 +80,6 @@
       this.map_type = "roadmap";
       this.default_bounds = this.bounds;
       this.canvas = Raphael(this.div_id, this.map_width, this.map_height);
-      this.canvas;
     }
     Map.prototype.map_base_url = function() {
       return this.map_current_url(this.default_bounds);
