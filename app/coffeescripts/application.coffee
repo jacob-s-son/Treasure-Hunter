@@ -22,6 +22,9 @@ class Square
 	add_to_visited: ->
 		@map.add_to_visited(@nr)
 		
+	log_bounds: ->
+		$('#log').html("<p>bounds = #{@bounds[0].lat}, #{@bounds[0].lng}, #{@bounds[1].lat}, #{@bounds[1].lng}</p>")
+		
 	clicked: (event) ->
 		alert "You clicked square with coordinates x = #{@coords.x} , y = #{@coords.y}, bounds = #{@bounds[0].lat}, #{@bounds[0].lng}, #{@bounds[1].lat}, #{@bounds[1].lng}"
 		@add_to_visited()
@@ -29,6 +32,7 @@ class Square
 		@map.draw_map()
 		
 	hover: ->
+		@log_bounds()
 		if @rec.attr("fill-opacity") == 0
 			@rec.attr 
 				"fill-opacity": 0.5
@@ -54,10 +58,12 @@ class Square
 	add_bounds: (@bounds) ->
 				
 class Map
-	constructor: (@bounds, @number_of_levels, @div_id) ->
+	constructor: (@bounds, @number_of_levels, @div_id, @size_in_squares) ->
+		@size_in_squares ?= 8
 		@number_of_levels ?= 3
 		@div_id ?= "map_canvas"
 		@map_width = @map_height = 512
+		@square_size = @map_width / @size_in_squares
 		@map_type = "roadmap"
 		@default_bounds = @bounds
 		@canvas = Raphael @div_id, @map_width, @map_height
@@ -70,10 +76,10 @@ class Map
 	init_squares: ->
 		@squares = []
 		i = 0
-		while i <= 255
+		while i <= Math.pow @size_in_squares, 2
 		  @squares[i] = []
 		  j = 0
-		  while j <= 255
+		  while j <= Math.pow @size_in_squares, 2
 		    @squares[i][j] = []
 		    j++
 		  i++
@@ -90,11 +96,11 @@ class Map
 	map_current_url: (bounds) ->
 		bounds ?= @bounds
 		"http://maps.google.com/maps/api/staticmap?visible=#{ bounds[0].lat },#{ bounds[0].lng }|#{ bounds[1].lat },
-		#{ bounds[1].lng }&center=#{@map_center()}&size=#{ @map_width }x#{ @map_height }&maptype=#{ @map_type }&sensor=false"
+		#{ bounds[1].lng }&size=#{ @map_width }x#{ @map_height }&maptype=#{ @map_type }&sensor=false"
 	
 	indexes_to_bounds: (x,y) ->
-		square_geo_height = (@bounds[0].lat - @bounds[1].lat) / 16
-		square_geo_width = (@bounds[1].lng - @bounds[0].lng) / 16
+		square_geo_height = (@bounds[0].lat - @bounds[1].lat) / @size_in_squares
+		square_geo_width = (@bounds[1].lng - @bounds[0].lng) / @size_in_squares
 		
 		
 		new_bounds = [ 
@@ -109,9 +115,9 @@ class Map
 		@level_squares = []
 		number = 1
 		
-		for i in [1..16]
-			for j in [1..16]
-				@level_squares.push new Square this, 32 * (j - 1), 32 * (i - 1), number
+		for i in [1..@size_in_squares]
+			for j in [1..@size_in_squares]
+				@level_squares.push new Square this, @square_size * (j - 1), @square_size * (i - 1), number, @square_size
 				@level_squares[number-1].add_bounds @indexes_to_bounds( j, i )
 				# alert "#{@indexes_to_bounds(j,i)[0].lat}, #{@indexes_to_bounds(j,i)[0].lng}, #{@indexes_to_bounds(j,i)[1].lat}, #{@indexes_to_bounds(j,i)[1].lng}"
 				number++

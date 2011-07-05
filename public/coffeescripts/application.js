@@ -1,4 +1,4 @@
-/* DO NOT MODIFY. This file was compiled Mon, 04 Jul 2011 16:10:35 GMT from
+/* DO NOT MODIFY. This file was compiled Tue, 05 Jul 2011 09:02:04 GMT from
  * /Users/jekabedg/Workspace/treasure-hunter/app/coffeescripts/application.coffee
  */
 
@@ -39,6 +39,9 @@
     Square.prototype.add_to_visited = function() {
       return this.map.add_to_visited(this.nr);
     };
+    Square.prototype.log_bounds = function() {
+      return $('#log').html("<p>bounds = " + this.bounds[0].lat + ", " + this.bounds[0].lng + ", " + this.bounds[1].lat + ", " + this.bounds[1].lng + "</p>");
+    };
     Square.prototype.clicked = function(event) {
       alert("You clicked square with coordinates x = " + this.coords.x + " , y = " + this.coords.y + ", bounds = " + this.bounds[0].lat + ", " + this.bounds[0].lng + ", " + this.bounds[1].lat + ", " + this.bounds[1].lng);
       this.add_to_visited();
@@ -46,6 +49,7 @@
       return this.map.draw_map();
     };
     Square.prototype.hover = function() {
+      this.log_bounds();
       if (this.rec.attr("fill-opacity") === 0) {
         return this.rec.attr({
           "fill-opacity": 0.5,
@@ -82,28 +86,35 @@
     return Square;
   })();
   Map = (function() {
-    function Map(bounds, number_of_levels, div_id) {
-      var i, _ref, _ref2, _ref3;
+    function Map(bounds, number_of_levels, div_id, size_in_squares) {
+      var i, _ref, _ref2, _ref3, _ref4;
       this.bounds = bounds;
       this.number_of_levels = number_of_levels;
       this.div_id = div_id;
-            if ((_ref = this.number_of_levels) != null) {
+      this.size_in_squares = size_in_squares;
+            if ((_ref = this.size_in_squares) != null) {
         _ref;
+      } else {
+        this.size_in_squares = 8;
+      };
+            if ((_ref2 = this.number_of_levels) != null) {
+        _ref2;
       } else {
         this.number_of_levels = 3;
       };
-            if ((_ref2 = this.div_id) != null) {
-        _ref2;
+            if ((_ref3 = this.div_id) != null) {
+        _ref3;
       } else {
         this.div_id = "map_canvas";
       };
       this.map_width = this.map_height = 512;
+      this.square_size = this.map_width / this.size_in_squares;
       this.map_type = "roadmap";
       this.default_bounds = this.bounds;
       this.canvas = Raphael(this.div_id, this.map_width, this.map_height);
       this.current_level = 1;
       this.breadcrumbs = [];
-      for (i = 0, _ref3 = this.number_of_levels; 0 <= _ref3 ? i <= _ref3 : i >= _ref3; 0 <= _ref3 ? i++ : i--) {
+      for (i = 0, _ref4 = this.number_of_levels; 0 <= _ref4 ? i <= _ref4 : i >= _ref4; 0 <= _ref4 ? i++ : i--) {
         this.breadcrumbs.push(0);
       }
       this.init_squares();
@@ -112,10 +123,10 @@
       var i, j;
       this.squares = [];
       i = 0;
-      while (i <= 255) {
+      while (i <= Math.pow(this.size_in_squares, 2)) {
         this.squares[i] = [];
         j = 0;
-        while (j <= 255) {
+        while (j <= Math.pow(this.size_in_squares, 2)) {
           this.squares[i][j] = [];
           j++;
         }
@@ -138,12 +149,12 @@
       } else {
         bounds = this.bounds;
       };
-      return "http://maps.google.com/maps/api/staticmap?visible=" + bounds[0].lat + "," + bounds[0].lng + "|" + bounds[1].lat + ",		" + bounds[1].lng + "&center=" + (this.map_center()) + "&size=" + this.map_width + "x" + this.map_height + "&maptype=" + this.map_type + "&sensor=false";
+      return "http://maps.google.com/maps/api/staticmap?visible=" + bounds[0].lat + "," + bounds[0].lng + "|" + bounds[1].lat + ",		" + bounds[1].lng + "&size=" + this.map_width + "x" + this.map_height + "&maptype=" + this.map_type + "&sensor=false";
     };
     Map.prototype.indexes_to_bounds = function(x, y) {
       var new_bounds, square_geo_height, square_geo_width;
-      square_geo_height = (this.bounds[0].lat - this.bounds[1].lat) / 16;
-      square_geo_width = (this.bounds[1].lng - this.bounds[0].lng) / 16;
+      square_geo_height = (this.bounds[0].lat - this.bounds[1].lat) / this.size_in_squares;
+      square_geo_width = (this.bounds[1].lng - this.bounds[0].lng) / this.size_in_squares;
       return new_bounds = [
         {
           lat: this.bounds[0].lat - square_geo_height * (y - 1),
@@ -155,12 +166,12 @@
       ];
     };
     Map.prototype.draw_squares = function() {
-      var i, j, number;
+      var i, j, number, _ref, _ref2;
       this.level_squares = [];
       number = 1;
-      for (i = 1; i <= 16; i++) {
-        for (j = 1; j <= 16; j++) {
-          this.level_squares.push(new Square(this, 32 * (j - 1), 32 * (i - 1), number));
+      for (i = 1, _ref = this.size_in_squares; 1 <= _ref ? i <= _ref : i >= _ref; 1 <= _ref ? i++ : i--) {
+        for (j = 1, _ref2 = this.size_in_squares; 1 <= _ref2 ? j <= _ref2 : j >= _ref2; 1 <= _ref2 ? j++ : j--) {
+          this.level_squares.push(new Square(this, this.square_size * (j - 1), this.square_size * (i - 1), number, this.square_size));
           this.level_squares[number - 1].add_bounds(this.indexes_to_bounds(j, i));
           number++;
         }

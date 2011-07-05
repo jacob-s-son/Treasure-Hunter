@@ -1,0 +1,47 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<script type="text/javascript" src="http://maps.google.com/maps/api/js?v=3.3&sensor=false"></script> 
+		<style type="text/css">
+			html, body{
+				height: 100%;
+				overflow: hidden;
+			}
+			body{
+				height: 96%;
+				margin: 10px 10px 10px 10px;
+			}
+			img{
+				border:0;
+				vertical-align:bottom;
+			}
+			#map_container{
+				width:512px;
+				height:512px;
+				border-width: 0px;
+				background-color:white;
+			}
+			#status {
+				background-color: #eeeeee;
+				padding: 3px 5px 3px 5px;
+				opacity: .9;
+			}
+		</style>
+		<script type="text/javascript">
+			function init() {
+				var latlng = new google.maps.LatLng(56.9466,24.10572);
+				opts = { 
+					mapTypeId:google.maps.MapTypeId.ROADMAP, 
+					center:latlng,
+					zoom:12 
+				};
+				map = new google.maps.Map(document.getElementById("map_container"), opts );
+			}
+		</script>
+	</head>
+	<body onload="init()">
+		<div id="map_container"></div>
+	</body>
+</html>
